@@ -18,7 +18,7 @@ namespace DynaBlaster
         protected enum direction { LEFT, UP, RIGHT, DOWN };
         protected direction dir;
 
-        public Animation walkingLeft, walkingRight, walkingUp, walkingDown, dyingAnimation;
+        public Animation walk, dyingAnimation;
         public Rectangle sourceRectangle;
         protected Rectangle locationRectangle
         {

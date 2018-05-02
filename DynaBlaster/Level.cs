@@ -22,7 +22,7 @@ namespace DynaBlaster
         public Tile obstacleTile;
         public int columns, rows, timeLeft, type;
         private int[] monsterTemplate;
-        List<Monster> monsters;
+        public List<Monster> monsters;
 
         public Level(int rows, int columns, int type, int[] monsterTemplate)
         {
@@ -48,9 +48,7 @@ namespace DynaBlaster
                     tiles[row, column].draw(sb, x, y);             
                 }
             foreach (Monster m in monsters)
-            {
-                    m.draw(sb);
-            }
+                m.draw(sb);
         }
 
         public void setMonsters()
@@ -105,10 +103,20 @@ namespace DynaBlaster
                     }
         }
 
-        public void updateMonsters()
+        public void updateMonsters(Character character)
         {
-            foreach (Monster m in monsters)
-                m.update();
+            for (int i = monsters.Count-1; i >= 0; i--)
+            {
+                Monster m = monsters.ElementAt(i);
+                if (m.scoreDisplay && Game1.gameMiliseconds - m.deathTime > 4000)
+                    monsters.Remove(m);
+                else
+                {
+                    if (character.row == m.row && character.column == m.column && !character.dead)
+                        character.die();
+                    m.update();
+                }                   
+            }
         }
 
         public void initialize()

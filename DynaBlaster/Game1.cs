@@ -20,15 +20,14 @@ namespace DynaBlaster
         int drawType;
         Boolean levelLoaded;
         GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;        
-             
+        SpriteBatch spriteBatch;                  
                 
         Tile[,] tiles;
         RenderTarget2D _nativeRenderTarget;
         Rectangle screenRect;
         Controls controls;
 
-        public static Rectangle debug;
+        //public static Rectangle debug;
 
         public Game1()
         {
@@ -83,10 +82,7 @@ namespace DynaBlaster
 
         void loadCharacterAnimations()
         {
-            character.walkingDown = new Animation(4, 125);
-            character.walkingRight = new Animation(4, 125);
-            character.walkingLeft = new Animation(4, 125);
-            character.walkingUp = new Animation(4, 125);
+            character.walk = new Animation(4, 125);
             character.dyingAnimation = new Animation(12, 167);
             Character.sprites = new Point[20];
             for (int i=0;i<13;i++)
@@ -215,15 +211,15 @@ namespace DynaBlaster
                 else if (dynOrigin.Y < -levelHeight + 208)
                     dynOrigin.Y = -levelHeight + 208;
 
-                levels[currentLevelNr].updateMonsters();
+                levels[currentLevelNr].updateMonsters(character);
 
-                if (!character.visible && gameMiliseconds - character.deathTime > 4000)
+                if (!character.visible && gameMiliseconds - character.deathTime > 3000)
                 {
                     drawType = 0;
                     restartLevel();
                 }
             }
-            else if (gameMiliseconds - NonGameplay.stageNrTime > 4000)
+            else if (gameMiliseconds - NonGameplay.stageNrTime > 3000)
                 drawType = 1;
         }     
 

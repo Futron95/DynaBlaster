@@ -108,6 +108,8 @@ namespace DynaBlaster
             explosionTime = Game1.gameMiliseconds;
             explosionRange = new int[4];
             int checkedRow=0, checkedColumn=0, i;
+            if (character.row == row && character.column == column)
+                character.die();
             for (int dir = 0; dir < 4; dir++)
             {
                 for (i = 1; i <= character.bombPower; i++)
@@ -130,6 +132,9 @@ namespace DynaBlaster
                             {
                                 if (!character.dead && checkedRow == character.row && checkedColumn == character.column)
                                     character.die();
+                                foreach (Monster m in Game1.levels[Game1.currentLevelNr].monsters)
+                                    if (!m.dead && checkedRow == m.row && checkedColumn == m.column)
+                                        m.die();
                                 Boolean trigger = false;
                                 foreach (Bomb bomb in character.bombs)                          //sprawdzanie czy wybuch sięgnie inną bombę
                                     if (!bomb.exploded && bomb.column == checkedColumn && bomb.row == checkedRow)

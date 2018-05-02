@@ -84,12 +84,12 @@ namespace DynaBlaster
                             {
                                 if (dir != direction.UP)
                                 {
-                                    walkingUp.reset();
+                                    walk.reset();
                                     dir = direction.UP;
                                 }
                                 idle = false;
                                 goVertically();
-                                sourceRectangle.Location = sprites[up[walkingUp.getCurrentFrame()]];
+                                sourceRectangle.Location = sprites[up[walk.getCurrentFrame()]];
                             }
                             break;
                         }
@@ -99,12 +99,12 @@ namespace DynaBlaster
                             {
                                 if (dir != direction.DOWN)
                                 {
-                                    walkingDown.reset();
+                                    walk.reset();
                                     dir = direction.DOWN;
                                 }
                                 idle = false;
                                 goVertically();
-                                sourceRectangle.Location = sprites[down[walkingDown.getCurrentFrame()]];
+                                sourceRectangle.Location = sprites[down[walk.getCurrentFrame()]];
                             }
                             break;
                         }
@@ -114,12 +114,12 @@ namespace DynaBlaster
                             {
                                 if (dir != direction.LEFT)
                                 {
-                                    walkingLeft.reset();
+                                    walk.reset();
                                     dir = direction.LEFT;
                                 }
                                 idle = false;
                                 goHorizontally();
-                                sourceRectangle.Location = sprites[left[walkingLeft.getCurrentFrame()]];
+                                sourceRectangle.Location = sprites[left[walk.getCurrentFrame()]];
                             }
                             break;
                         }
@@ -129,12 +129,12 @@ namespace DynaBlaster
                             {
                                 if (dir != direction.RIGHT)
                                 {
-                                    walkingRight.reset();
+                                    walk.reset();
                                     dir = direction.RIGHT;
                                 }
                                 idle = false;
                                 goHorizontally();
-                                sourceRectangle.Location = sprites[right[walkingRight.getCurrentFrame()]];
+                                sourceRectangle.Location = sprites[right[walk.getCurrentFrame()]];
                             }
                             break;
                         }
