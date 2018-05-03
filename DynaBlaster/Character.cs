@@ -19,13 +19,12 @@ namespace DynaBlaster
     {
         public static Point[] sprites;
         public static int[] left, right, up, down, dying;
-        public Boolean idle;
+        public Boolean idle, teleporting;
         public int bombPower, lives;
-
-       
-        private int bombsAvailable;
-        
-        
+        Animation teleportingAnimation, starsAnimation;
+        Rectangle starsSourceRectangle;
+        public long cutTime;
+        public int bombsAvailable, cuts;       
 
         public int column
         {
@@ -38,32 +37,103 @@ namespace DynaBlaster
         }
 
         public List<Bomb> bombs;
-        
-        public void restart()
+
+        static Character()
         {
-            x = 21;
-            y = 35;
-            visible = true;
-            dead = false;
-            dir = direction.DOWN;
-            bombs = new List<Bomb>();
-        }
+            Character.sprites = new Point[20];
+            for (int i = 0; i < 13; i++)
+                Character.sprites[i] = new Point(i * 24, 0);
+            for (int i = 13; i < 20; i++)
+                Character.sprites[i] = new Point((i - 13) * 24, 24);
+            Character.left = new int[4] { 6, 7, 6, 8 };
+            Character.right = new int[4] { 3, 4, 3, 5 };
+            Character.up = new int[4] { 9, 10, 9, 11 };
+            Character.down = new int[4] { 0, 1, 0, 2 };
+            Character.dying = new int[12] { 12, 13, 12, 13, 12, 13, 14, 15, 16, 17, 18, 19 };
+        }   
 
         public Character()
         {
             width = 24;
             height = 24;
             sourceRectangle = new Rectangle(0, 0, 24, 24);
-            speed = 0.8;    
+            speed = 1.0;    
             bombsAvailable = 4;
             bombPower = 3;
             lives = 2;
             deathTime = 0;
+            walk = new Animation(4, 125);
+            dyingAnimation = new Animation(12, 167);
+            teleportingAnimation = new Animation(4, 125);
+            starsAnimation = new Animation(4, 66);
+        }
+
+        public void restart()
+        {
+            x = 21;
+            y = 35;
+            height = 24;
+            visible = true;
+            dead = false;
+            teleporting = false;
+            dir = direction.DOWN;
+            bombs = new List<Bomb>();
+            cuts = 0;
+        }
+
+        private void setTeleportingSourceRectangle()
+        {
+            if (Game1.gameMiliseconds - cutTime > 166)
+            {
+                cuts++;
+                y++;
+                height--;
+                cutTime = Game1.gameMiliseconds;
+
+                if (cuts == 24)
+                {
+                    visible = false;
+                    return;
+                }
+            }
+            int frameNr = teleportingAnimation.getCurrentFrame();
+            Point point;
+            switch (frameNr)
+            {
+                case 0: point = sprites[left[0]]; break;
+                case 1: point = sprites[up[0]]; break;
+                case 2: point = sprites[right[0]]; break;
+                case 3: point = sprites[down[0]]; break;
+                default: point = new Point(0, 0); break;
+            }
+            point.Y += cuts;
+            sourceRectangle = new Rectangle(point, new Point(width, height));
         }
 
         public void Update(Controls controls)
         {
-            if (dead && visible)
+            if (!visible)
+                return;
+            if (!teleporting)
+            {
+                if (Game1.levels[Game1.currentLevelNr].monstersNumber == 0 && Game1.levels[Game1.currentLevelNr].tiles[row, column].hasTeleport)
+                {
+                    if (Math.Abs((int)x+3 - (column*16-8))<3 && Math.Abs((int)y+5 - (row*16+24))<3)
+                    {
+                        x = column * 16 - 11;
+                        y = row * 16 + 19;
+                        teleporting = true;
+                        cutTime = Game1.gameMiliseconds;
+                    }
+                }
+            }
+            if (teleporting)
+            {
+                setTeleportingSourceRectangle();
+                setStarsSourceRectangle(starsAnimation.getCurrentFrame());
+                return;
+            }
+            if (dead)
             {
                 if (Game1.gameMiliseconds - deathTime < dyingAnimation.length)
                     sourceRectangle.Location = sprites[dying[dyingAnimation.getCurrentFrame()]];
@@ -71,6 +141,7 @@ namespace DynaBlaster
                     visible = false;
                 return;
             }
+
             idle = true;
             foreach (TouchLocation tl in Game1.touchCollection)
             {
@@ -200,7 +271,11 @@ namespace DynaBlaster
                 }
             }
             if (visible)
-                sb.Draw(Game1.spriteAtlas, locationRectangle, sourceRectangle, Color.White);           
+            {
+                sb.Draw(Game1.spriteAtlas, locationRectangle, sourceRectangle, Color.White);
+                if (teleporting)
+                    sb.Draw(Game1.spriteAtlas, new Rectangle((int)x, (int)y-8, 28, 16), starsSourceRectangle, Color.White);
+            }
         }
 
         private void goHorizontally()
@@ -231,7 +306,7 @@ namespace DynaBlaster
             else
             if (dir == direction.RIGHT)
                 targetColumn++;
-            //Game1.debug = new Rectangle(targetColumn * 16 - 4, targetRow * 16 + 28, 8, 8);
+            Game1.debug = new Rectangle(targetColumn * 16 - 4, targetRow * 16 + 28, 8, 8);
             if (Game1.levels[Game1.currentLevelNr].tiles[targetRow, targetColumn].hasObstacle)
                 return;
             if (type == 0)
@@ -284,7 +359,7 @@ namespace DynaBlaster
             else
             if (dir == direction.DOWN)
                 targetRow++;
-            //Game1.debug = new Rectangle(targetColumn * 16 - 4, targetRow * 16 + 28, 8, 8);
+            Game1.debug = new Rectangle(targetColumn * 16 - 4, targetRow * 16 + 28, 8, 8);
             if (Game1.levels[Game1.currentLevelNr].tiles[targetRow, targetColumn].hasObstacle)
                 return;
             if (type == 0)
@@ -307,6 +382,11 @@ namespace DynaBlaster
                 y += dist;
                 x += speed;
             }
+        }
+
+        private void setStarsSourceRectangle(int frame)
+        {
+            starsSourceRectangle = new Rectangle(170 + frame * 28, 24, 28, 16);
         }
     }
 }

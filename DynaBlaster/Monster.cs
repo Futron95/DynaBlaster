@@ -218,6 +218,7 @@ namespace DynaBlaster
             else
                 comboMultiplier = 1;
             lastDeathTime = deathTime;
+            Game1.levels[Game1.currentLevelNr].monstersNumber--;
         }
     }
 }

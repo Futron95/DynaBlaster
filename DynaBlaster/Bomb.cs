@@ -130,7 +130,7 @@ namespace DynaBlaster
                         {
                             if (checkedTile.walkable)
                             {
-                                if (!character.dead && checkedRow == character.row && checkedColumn == character.column)
+                                if (!character.dead && checkedRow == character.row && checkedColumn == character.column && !character.teleporting)
                                     character.die();
                                 foreach (Monster m in Game1.levels[Game1.currentLevelNr].monsters)
                                     if (!m.dead && checkedRow == m.row && checkedColumn == m.column)
