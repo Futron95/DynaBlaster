@@ -53,12 +53,12 @@ namespace DynaBlaster
             spriteNrs[13] = getNrs(108,4);
             spriteNrs[14] = getNrs(115,16);
             spriteNrs[15] = new int[4] { 129, 130, 131, 132 };
-            spriteNrs[16] = getNrs(137,16);
+            spriteNrs[16] = new int[16] { 142, 141, 142, 141, 139, 140, 145, 140, 143, 144, 143, 144, 137, 138, 147, 138 };
             spriteNrs[17] = getNrs(152,16);
             spriteNrs[18] = getNrs(168,4);
             dyingSpriteNrs = new int[19][];
             dyingSpriteNrs[0] = new int[10] { 10,10,10,10,10,11,0,1,2,3};
-            dyingSpriteNrs[1] = new int[10] { 16,16,16,16,17,11,1,2,3,4};
+            dyingSpriteNrs[1] = new int[10] { 16,16,16,16,17,11,0,1,2,3};
             dyingSpriteNrs[2] = new int[10] { 21,21,21,21,22,23,24,4,5,6};
             dyingSpriteNrs[3] = new int[10] { 28,28,28,28,29,11,0,1,2,3};
             dyingSpriteNrs[4] = new int[10] { 42,42,42,42,43,44,45,4,5,6};
@@ -119,7 +119,6 @@ namespace DynaBlaster
             this.type = type;
             walk = new Animation(4, 167);
             dyingAnimation = new Animation(10, 200);
-            r = new Random();
             dir = (direction)r.Next(0,4);
             speed = 0.5;
             visible = true;

@@ -27,7 +27,7 @@ namespace DynaBlaster
         Rectangle screenRect;
         Controls controls;
 
-        public static Rectangle debug;
+        //public static Rectangle debug;
 
         public Game1()
         {
@@ -76,7 +76,7 @@ namespace DynaBlaster
             spriteBatch = new SpriteBatch(GraphicsDevice);
             character = new Character();
             loadBombSprites();
-            levels = new Level[2];
+            levels = new Level[64];
             currentLevelNr = 0;
             createCurrentLevel();
             restartLevel();
@@ -140,6 +140,8 @@ namespace DynaBlaster
         private void restartLevel()
         {
             NonGameplay.stageNrTime = gameMiliseconds;
+            if (currentLevelNr > 63)
+                currentLevelNr = 0;
             if (levels[currentLevelNr] == null)
                 createCurrentLevel();
             else
@@ -207,7 +209,7 @@ namespace DynaBlaster
             {
                 levels[currentLevelNr].draw(spriteBatch);                                                 //rysowanie poziomu           
                 character.draw(spriteBatch);                                                              //rysowanie postaci      
-                DrawRectangle(debug, Color.White);                                                      //rysowanie prostok¹ta do debugowania
+                //DrawRectangle(debug, Color.White);                                                      //rysowanie prostok¹ta do debugowania
                 spriteBatch.Draw(spriteAtlas, new Rectangle(origin, new Point(256, 24)), new Rectangle(0, 148, 256, 24), Color.White); //rysowanie hud'a
             }
             else
@@ -233,8 +235,10 @@ namespace DynaBlaster
         {
             switch(currentLevelNr)
             {
-                case 0: levels[0] = new Level(13, 17, 0, new int[] { 0 }); break;
-                case 1: levels[1] = new Level(13, 17, 1, new int[] { 0, 0, 0, 1 }); break;
+                case 0: levels[0] = new Level(13, 17, 0, new int[] { 0, 1, 2 }); break;
+                case 1: levels[1] = new Level(19, 17, 1, new int[] { 3, 4, 5}); break;
+                case 2: levels[2] = new Level(13, 23, 2, new int[] { 6, 7, 8 }); break;
+                default: levels[currentLevelNr] = Level.getRandomLevel(); break;
             }
             
 

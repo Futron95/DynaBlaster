@@ -57,7 +57,7 @@ namespace DynaBlaster
             width = 24;
             height = 24;
             sourceRectangle = new Rectangle(0, 0, 24, 24);
-            speed = 1.0;    
+            speed = 0.8;    
             bombsAvailable = 4;
             bombPower = 3;
             lives = 2;
@@ -159,7 +159,7 @@ namespace DynaBlaster
                                     dir = direction.UP;
                                 }
                                 idle = false;
-                                goVertically();
+                                goUp();
                                 sourceRectangle.Location = sprites[up[walk.getCurrentFrame()]];
                             }
                             break;
@@ -174,7 +174,7 @@ namespace DynaBlaster
                                     dir = direction.DOWN;
                                 }
                                 idle = false;
-                                goVertically();
+                                goDown();
                                 sourceRectangle.Location = sprites[down[walk.getCurrentFrame()]];
                             }
                             break;
@@ -189,7 +189,7 @@ namespace DynaBlaster
                                     dir = direction.LEFT;
                                 }
                                 idle = false;
-                                goHorizontally();
+                                goLeft();
                                 sourceRectangle.Location = sprites[left[walk.getCurrentFrame()]];
                             }
                             break;
@@ -204,7 +204,7 @@ namespace DynaBlaster
                                     dir = direction.RIGHT;
                                 }
                                 idle = false;
-                                goHorizontally();
+                                goRight();
                                 sourceRectangle.Location = sprites[right[walk.getCurrentFrame()]];
                             }
                             break;
@@ -274,114 +274,178 @@ namespace DynaBlaster
             {
                 sb.Draw(Game1.spriteAtlas, locationRectangle, sourceRectangle, Color.White);
                 if (teleporting)
-                    sb.Draw(Game1.spriteAtlas, new Rectangle((int)x, (int)y-8, 28, 16), starsSourceRectangle, Color.White);
+                    sb.Draw(Game1.spriteAtlas, new Rectangle(locationRectangle.X, locationRectangle.Y-8, 28, 16), starsSourceRectangle, Color.White);
             }
         }
 
-        private void goHorizontally()
+        private void goLeft()
         {
-            double dist;
-            if (dir == direction.LEFT)
+            if (this.x-speed<21)
             {
-                if (locationRectangle.X <= 21)
-                    return;
-                else
-                    dist = -speed;
-            }
-            else
-            {
-                int levelWidth = (Game1.levels[Game1.currentLevelNr].columns - 1) * 16;
-                if (locationRectangle.X >= levelWidth - 43)
-                    return;
-                else
-                    dist = speed;
-            }
-            int type = (locationRectangle.Y - 35) % 32;
-            int targetRow = (locationRectangle.Y - 35 - type) / 32 * 2 + 1;
-            if (type > 16)
-                targetRow += 2;
-            int targetColumn = (locationRectangle.X - 21) / 16+2;
-            if (dir == direction.LEFT && (locationRectangle.X - 21) % 16 == 0)
-                targetColumn--;
-            else
-            if (dir == direction.RIGHT)
-                targetColumn++;
-            Game1.debug = new Rectangle(targetColumn * 16 - 4, targetRow * 16 + 28, 8, 8);
-            if (Game1.levels[Game1.currentLevelNr].tiles[targetRow, targetColumn].hasObstacle)
+                this.x = 21;
                 return;
-            if (type == 0)
-                x += dist;
-            else
-            if (type > 0 && type < 7)
+            }
+            double x = this.x;
+            double y = this.y;
+            int targetColumn = (int)((x - speed - 21 )/ 16)+2;
+            int targetRow;
+            double type = (y - 35) % 32;
+            if (type >= 16 && type < 17)
+                return;
+            if (type < 7 || type >23)
+                x -= speed;
+            if (type < 16)
             {
-                x += dist;
-                y -= speed;
+                targetRow = (int)((y - type - 19) / 16);
+                if (type < speed)
+                    y -= type;
+                else
+                    y -= speed;               
             }
             else
-            if (type > 6 && type < 16)
-                y -= speed;
-            else
-            if (type > 16 && type < 24)
-                y += speed;
-            else
-            if (type > 23)
             {
-                x += dist;
-                y += speed;
+                targetRow = (int)((y - type - 19) / 16) + 2;
+                if (type + speed > 31)
+                    y += 31 - type;
+                else
+                    y += speed;               
             }
+            //Game1.debug = new Rectangle(targetColumn * 16 - 4, targetRow * 16 + 28, 8, 8);
+            if (Game1.levels[Game1.currentLevelNr].tiles[targetRow, targetColumn].hasObstacle)
+            {
+                this.x = (targetColumn + 1) * 16 - 11;
+                return;
+            }
+            this.x = x;
+            this.y = y;
         }
 
-        private void goVertically()
+        private void goRight()
         {
-            double dist;
-            if (dir == direction.UP)
+            int levelWidth = (Game1.levels[Game1.currentLevelNr].columns - 1) * 16;
+            if (this.x + speed > levelWidth-43)
             {
-                if (locationRectangle.Y <= 35)
-                    return;
-                else
-                    dist = -speed;
-            }
-            else
-            {
-                int levelHeight = Game1.levels[Game1.currentLevelNr].rows * 16 + 24;
-                if (locationRectangle.Y >= levelHeight - 37)
-                    return;
-                else
-                    dist = speed;
-            }
-            int type = (locationRectangle.X - 21) % 32;
-            int targetColumn = (locationRectangle.X - 21 - type) / 32 * 2 + 2;
-            if (type >= 16)
-                targetColumn += 2;
-            int targetRow = (locationRectangle.Y - 35) / 16+1;
-            if (dir == direction.UP && (locationRectangle.Y - 35) % 16 == 0)
-                targetRow--;
-            else
-            if (dir == direction.DOWN)
-                targetRow++;
-            Game1.debug = new Rectangle(targetColumn * 16 - 4, targetRow * 16 + 28, 8, 8);
-            if (Game1.levels[Game1.currentLevelNr].tiles[targetRow, targetColumn].hasObstacle)
+                this.x = levelWidth-43;
                 return;
-            if (type == 0)
-                y += dist;
-            else
-            if (type > 0 && type < 7)
+            }
+            double x = this.x;
+            double y = this.y;
+            int targetColumn = (int)((x + speed + 11) / 16)+1;
+            int targetRow;
+            double type = (y - 35) % 32;
+            if (type >= 16 && type < 17)
+                return;
+            if (type < 7 || type > 23)
+                x += speed;
+            if (type < 16)
             {
-                y += dist;
-                x -= speed;
+                targetRow = (int)((y - type - 19) / 16);
+                if (type < speed)
+                    y -= type;
+                else
+                    y -= speed;               
             }
             else
-            if (type > 6 && type < 16)
-                x -= speed;
-            else
-            if (type > 16 && type < 24)
-                x += speed;
-            else
-            if (type > 23)
             {
-                y += dist;
-                x += speed;
+                targetRow = (int)((y - type - 19) / 16) + 2;
+                if (type + speed > 31)
+                    y += 31 - type;
+                else
+                    y += speed;               
             }
+            //Game1.debug = new Rectangle(targetColumn * 16 - 4, targetRow * 16 + 28, 8, 8);
+            if (Game1.levels[Game1.currentLevelNr].tiles[targetRow, targetColumn].hasObstacle)
+            {
+                this.x = (targetColumn -1) * 16 - 11;
+                return;
+            }
+            this.x = x;
+            this.y = y;
+        }
+
+        private void goUp()
+        {
+            if (this.y - speed < 35)
+            {
+                this.y = 35;
+                return;
+            }
+            double x = this.x;
+            double y = this.y;
+            int targetRow = (int)((y - 35 - speed) / 16) + 1;
+            int targetColumn;
+            double type = (x - 21) % 32;
+            if (type >= 16 && type < 17)
+                return;
+            if (type < 7 || type > 23)
+                y -= speed;
+            if (type < 16)
+            {
+                targetColumn = (int)((x - type - 21) / 16) + 2;
+                if (type < speed)
+                    x -= type;
+                else
+                    x -= speed;               
+            }
+            else
+            {
+                targetColumn = (int)((x - type - 21) / 16) + 4;
+                if (type + speed > 31)
+                    x += 31 - type;
+                else
+                    x += speed;               
+            }
+            //Game1.debug = new Rectangle(targetColumn * 16 - 4, targetRow * 16 + 28, 8, 8);
+            if (Game1.levels[Game1.currentLevelNr].tiles[targetRow, targetColumn].hasObstacle)
+            {
+                this.y = (targetRow + 1) * 16 + 19;
+                return;
+            }
+            this.x = x;
+            this.y = y;
+        }
+
+        private void goDown()
+        {
+            int levelHeight = (Game1.levels[Game1.currentLevelNr].rows) * 16;
+            if (this.y + speed > levelHeight-13)
+            {
+                this.y = levelHeight-13;
+                return;
+            }
+            double x = this.x;
+            double y = this.y;
+            int targetRow = (int)(y - 3 + speed) / 16;
+            int targetColumn;
+            double type = (x - 21) % 32;
+            if (type >= 16 && type < 17)
+                return;
+            if (type < 7 || type > 23)
+                y += speed;
+            if (type < 16)
+            {
+                targetColumn = (int)((x - type - 21) / 16) + 2;
+                if (type < speed)
+                    x -= type;
+                else
+                    x -= speed;               
+            }
+            else
+            {
+                targetColumn = (int)((x - type - 21) / 16) + 4;
+                if (type + speed > 31)
+                    x += 31 - type;
+                else
+                    x += speed;              
+            }
+            //Game1.debug = new Rectangle(targetColumn * 16 - 4, targetRow * 16 + 28, 8, 8);
+            if (Game1.levels[Game1.currentLevelNr].tiles[targetRow, targetColumn].hasObstacle)
+            {
+                this.y = (targetRow -1) * 16 + 19;
+                return;
+            }
+            this.x = x;
+            this.y = y;
         }
 
         private void setStarsSourceRectangle(int frame)

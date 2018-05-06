@@ -38,6 +38,25 @@ namespace DynaBlaster
             initialize();
         }
 
+        public static Level getRandomLevel()
+        {
+            Random r = new Random();
+            int rows = 13 + r.Next(4) * 2;
+            int cols = 17 + r.Next(4) * 2;
+            int monNr = 3;
+            if (rows > 18)
+                monNr++;
+            if (cols > 22)
+                monNr++;
+            int type = r.Next(8);
+            int[] mTemplate = new int[monNr];
+            for (int i=0;i<monNr;i++)
+            {
+                mTemplate[i] = r.Next(19);
+            }
+            return new Level(rows, cols, type, mTemplate);
+        }
+
         public void draw(SpriteBatch sb)
         {
             int x, y;
@@ -59,7 +78,7 @@ namespace DynaBlaster
             monsters.Clear();
             Random r = new Random();
             double chance = monsterTemplate.Length/(double)(rows * columns)*3;
-            int monsterNr = 0;
+            monstersNumber = 0;
             while (true)                                                                //pętla nieskończona z której program wychodzi dopiero jak wylosuje pozycje przeszkód dla danego poziomu
                 for (int row = 1; row < rows - 1; row += 1)
                     for (int column = 2; column < columns - 2; column++)
@@ -70,9 +89,9 @@ namespace DynaBlaster
                         {
                             if (r.NextDouble() < chance)
                             {
-                                monsters.Add(new Monster(column * 16 - 8, row * 16 + 22, monsterTemplate[monsterNr]));
-                                monsterNr++;
-                                if (monsterNr == monsterTemplate.Length)
+                                monsters.Add(new Monster(column * 16 - 8, row * 16 + 22, monsterTemplate[monstersNumber]));
+                                monstersNumber++;
+                                if (monstersNumber == monsterTemplate.Length)
                                     return;
                             }
                         }

@@ -27,11 +27,16 @@ namespace DynaBlaster
         public Boolean dead, visible;
         protected int width, height;
         protected double speed;
-        protected Random r;
+        protected static Random r;
 
         public double x;
         public double y;  
 
         public long deathTime;      
+
+        static Entity()
+        {
+            r = new Random();
+        }
     }
 }
