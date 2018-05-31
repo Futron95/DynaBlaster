@@ -1,7 +1,9 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
+using Microsoft.Xna.Framework.Media;
 using System;
 using System.Diagnostics;
 
@@ -15,7 +17,10 @@ namespace DynaBlaster
         public static Level[] levels;
         public static int currentLevelNr;
         public static Texture2D spriteAtlas;
-        static Character character;
+        public static Character character;
+        public static int score = 0;
+        public static Sounds sounds;
+        public static SoundEffectInstance exp;
 
         int drawType;
         Boolean levelLoaded;
@@ -26,6 +31,7 @@ namespace DynaBlaster
         RenderTarget2D _nativeRenderTarget;
         Rectangle screenRect;
         Controls controls;
+        Hud hud;
 
         //public static Rectangle debug;
 
@@ -39,6 +45,8 @@ namespace DynaBlaster
             graphics.SupportedOrientations = DisplayOrientation.LandscapeLeft | DisplayOrientation.LandscapeRight;
             drawType = 0;
             levelLoaded = false;
+            sounds = new Sounds();
+            hud = new Hud();
         }
 
         public static int getScreenWidth()
@@ -73,6 +81,14 @@ namespace DynaBlaster
 
         protected override void LoadContent()
         {
+            sounds.music[0] = Content.Load<Song>("music1");
+            sounds.music[1] = Content.Load<Song>("music2");
+            sounds.music[2] = Content.Load<Song>("music3");
+            sounds.stageStart = Content.Load<Song>("stageStart");
+            sounds.death = Content.Load<Song>("death");
+            sounds.teleport = Content.Load<Song>("teleport");
+            sounds.explosion = Content.Load<SoundEffect>("explosion");
+            exp = sounds.explosion.CreateInstance();
             spriteBatch = new SpriteBatch(GraphicsDevice);
             character = new Character();
             loadBombSprites();
@@ -89,6 +105,7 @@ namespace DynaBlaster
             int bombSize = (int)(getScreenHeight() * (225 / 1080.0));
             Rectangle bombRect = new Rectangle(getScreenWidth() - bombSize, (getScreenHeight() - bombSize) / 2, bombSize, bombSize);
             controls = new Controls(dirButtonsTexture, controlsRect, bombButtonTexture, bombRect);
+
         }
 
         private Point[] getPointsForAnimation(int a)
@@ -139,6 +156,7 @@ namespace DynaBlaster
 
         private void restartLevel()
         {
+            MediaPlayer.Play(sounds.stageStart);
             NonGameplay.stageNrTime = gameMiliseconds;
             if (currentLevelNr > 63)
                 currentLevelNr = 0;
@@ -154,7 +172,7 @@ namespace DynaBlaster
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 Exit();
-          
+
             base.Update(gameTime);
             gameMiliseconds += gameTime.ElapsedGameTime.Milliseconds;
 
@@ -178,6 +196,7 @@ namespace DynaBlaster
                     dynOrigin.Y = -levelHeight + 208;
 
                 levels[currentLevelNr].updateMonsters(character);
+                hud.update();
 
                 if (!character.visible)
                 {
@@ -195,7 +214,11 @@ namespace DynaBlaster
                 }
             }
             else if (gameMiliseconds - NonGameplay.stageNrTime > 3000 && levelLoaded)
+            {
                 drawType = 1;
+                Level.startTime = gameMiliseconds;
+                MediaPlayer.Play(sounds.music[0]);
+            }
         }     
 
         protected override void Draw(GameTime gameTime)
@@ -209,8 +232,8 @@ namespace DynaBlaster
             {
                 levels[currentLevelNr].draw(spriteBatch);                                                 //rysowanie poziomu           
                 character.draw(spriteBatch);                                                              //rysowanie postaci      
-                //DrawRectangle(debug, Color.White);                                                      //rysowanie prostok¹ta do debugowania
-                spriteBatch.Draw(spriteAtlas, new Rectangle(origin, new Point(256, 24)), new Rectangle(0, 148, 256, 24), Color.White); //rysowanie hud'a
+              //DrawRectangle(debug, Color.White);                                                        //rysowanie prostok¹ta do debugowania
+                hud.draw(spriteBatch);                                                                    //rysowanie hud'a
             }
             else
                 NonGameplay.drawStageNr(spriteBatch);

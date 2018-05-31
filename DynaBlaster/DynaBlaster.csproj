@@ -65,11 +65,13 @@
     <Compile Include="Controls.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="Game1.cs" />
+    <Compile Include="Hud.cs" />
     <Compile Include="Level.cs" />
     <Compile Include="Monster.cs" />
     <Compile Include="NonGameplay.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sounds.cs" />
     <Compile Include="Tile.cs" />
   </ItemGroup>
   <ItemGroup>

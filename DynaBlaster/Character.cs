@@ -12,6 +12,7 @@ using Android.Widget;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input.Touch;
+using Microsoft.Xna.Framework.Media;
 
 namespace DynaBlaster
 {
@@ -124,6 +125,7 @@ namespace DynaBlaster
                         y = row * 16 + 19;
                         teleporting = true;
                         cutTime = Game1.gameMiliseconds;
+                        MediaPlayer.Play(Game1.sounds.teleport);
                     }
                 }
             }
@@ -250,6 +252,7 @@ namespace DynaBlaster
             lives--;
             dyingAnimation.reset();
             deathTime = Game1.gameMiliseconds;
+            MediaPlayer.Play(Game1.sounds.death);
         }
 
         public void draw(SpriteBatch sb)

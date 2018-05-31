@@ -20,9 +20,10 @@ namespace DynaBlaster
         public Point[] obstacleDestroy;
         public Tile[,] tiles;
         public Tile obstacleTile;
-        public int columns, rows, timeLeft, type, monstersNumber;
+        public int columns, rows, type, monstersNumber;
         private int[] monsterTemplate;
         public List<Monster> monsters;
+        public static long startTime;
 
         public Level(int rows, int columns, int type, int[] monsterTemplate)
         {
@@ -252,7 +253,6 @@ namespace DynaBlaster
             setObstacles();
             setMonsters();
             placeTeleport();
-            timeLeft = timeLimit;
         }
     }
 
