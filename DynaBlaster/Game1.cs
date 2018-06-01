@@ -6,6 +6,8 @@ using Microsoft.Xna.Framework.Input.Touch;
 using Microsoft.Xna.Framework.Media;
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.IO.IsolatedStorage;
 
 namespace DynaBlaster
 {
@@ -18,20 +20,18 @@ namespace DynaBlaster
         public static int currentLevelNr;
         public static Texture2D spriteAtlas;
         public static Character character;
-        public static int score = 0;
+        public static int score = 0, hiScore;
         public static Sounds sounds;
-        public static SoundEffectInstance exp;
-
+        public static Hud hud;
+        public Boolean levelLoaded, gameOver;
         int drawType;
-        Boolean levelLoaded;
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;                  
-                
         
+        GraphicsDeviceManager graphics;
+        SpriteBatch spriteBatch;
         RenderTarget2D _nativeRenderTarget;
         Rectangle screenRect;
         Controls controls;
-        Hud hud;
+       
 
         //public static Rectangle debug;
 
@@ -45,8 +45,9 @@ namespace DynaBlaster
             graphics.SupportedOrientations = DisplayOrientation.LandscapeLeft | DisplayOrientation.LandscapeRight;
             drawType = 0;
             levelLoaded = false;
-            sounds = new Sounds();
+            sounds = new Sounds(Content);
             hud = new Hud();
+            gameOver = false;
         }
 
         public static int getScreenWidth()
@@ -81,16 +82,8 @@ namespace DynaBlaster
 
         protected override void LoadContent()
         {
-            sounds.music[0] = Content.Load<Song>("music1");
-            sounds.music[1] = Content.Load<Song>("music2");
-            sounds.music[2] = Content.Load<Song>("music3");
-            sounds.stageStart = Content.Load<Song>("stageStart");
-            sounds.death = Content.Load<Song>("death");
-            sounds.teleport = Content.Load<Song>("teleport");
-            sounds.explosion = Content.Load<SoundEffect>("explosion");
-            exp = sounds.explosion.CreateInstance();
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            character = new Character();
+            character = new Character(this);
             loadBombSprites();
             levels = new Level[64];
             currentLevelNr = 0;
@@ -105,7 +98,8 @@ namespace DynaBlaster
             int bombSize = (int)(getScreenHeight() * (225 / 1080.0));
             Rectangle bombRect = new Rectangle(getScreenWidth() - bombSize, (getScreenHeight() - bombSize) / 2, bombSize, bombSize);
             controls = new Controls(dirButtonsTexture, controlsRect, bombButtonTexture, bombRect);
-
+            GetHiScore();
+            hud.fillHiScoreArray();
         }
 
         private Point[] getPointsForAnimation(int a)
@@ -203,11 +197,29 @@ namespace DynaBlaster
                     if (character.dead && gameMiliseconds - character.deathTime > 3000)
                     {
                         drawType = 0;
+                        if (gameOver)
+                        {
+                            restart();
+                            return;
+                        }
                         restartLevel();
                     }
                     if (character.cuts == 24 && gameMiliseconds - character.cutTime > 1000)
                     {
-                        drawType = 0;
+                        drawType = 0;                      
+                        int bonusNr = currentLevelNr % 4;
+                        switch (bonusNr)
+                        {
+                            case 0: character.bombPower++; break;
+                            case 1:
+                                {
+                                    if (character.lives < 9)
+                                        character.lives++;
+                                    break;
+                                }
+                            case 2: character.bombsAvailable++; break;                                                      
+                            case 3: if (character.speed<2.0) character.speed += 0.1; break;
+                        }
                         currentLevelNr++;
                         restartLevel();
                     }
@@ -217,7 +229,7 @@ namespace DynaBlaster
             {
                 drawType = 1;
                 Level.startTime = gameMiliseconds;
-                MediaPlayer.Play(sounds.music[0]);
+                sounds.music[currentLevelNr%3].Play();
             }
         }     
 
@@ -244,6 +256,20 @@ namespace DynaBlaster
             if (drawType==1)
                 controls.draw(spriteBatch);
             spriteBatch.End();
+        }
+
+        public void restart()
+        {
+            if (score >= hiScore)
+                saveHiScore();
+            score = 0;
+            gameMiliseconds = 0;
+            drawType = 0;
+            levelLoaded = false;
+            character = new Character(this);
+            currentLevelNr = 0;
+            createCurrentLevel();
+            restartLevel();
         }
 
         void DrawRectangle(Rectangle coords, Color color)
@@ -279,6 +305,41 @@ namespace DynaBlaster
                 if (bomb.row == row && bomb.column == column)
                     return false;
             return true;
+        }
+
+        private void GetHiScore()
+        {
+            var store = IsolatedStorageFile.GetUserStoreForApplication();
+
+            if (store.FileExists("score.txt"))
+            {
+                var fs = store.OpenFile("score.txt", FileMode.Open);
+                using (StreamReader sr = new StreamReader(fs))
+                {
+                    hiScore = Convert.ToInt16(sr.ReadLine());
+                }
+            }
+            else
+            {
+                var fs = store.CreateFile("score.txt");
+                using (StreamWriter sw = new StreamWriter(fs))
+                {
+                    sw.Write("0");
+                }
+                hiScore = 0;
+            }
+        }
+
+        private void saveHiScore()
+        {
+            var store = IsolatedStorageFile.GetUserStoreForApplication();
+            var fs = store.OpenFile("score.txt", FileMode.OpenOrCreate);
+            using (StreamWriter sw = new StreamWriter(fs))
+            {
+                sw.Write(score);
+            }
+            hiScore = score;
+            hud.fillHiScoreArray();
         }
     }
 

@@ -16,13 +16,14 @@ namespace DynaBlaster
 {
     public class Hud
     {
-        private int[] scoreArray;
+        private int[] scoreArray, hiScoreArray;
         long timeLeft;
         int min, s1, s2;
 
         public Hud()
         {
             scoreArray = new int[9];
+            hiScoreArray = new int[9];
         }
 
         public void update()
@@ -36,7 +37,8 @@ namespace DynaBlaster
                 else
                     scoreArray[i] = (int)Char.GetNumericValue(scoreStr[i - (9 - scoreLength)]);
             }
-            timeLeft = Level.timeLimit - (Game1.gameMiliseconds - Level.startTime) / 1000;
+            if (!Game1.character.teleporting)
+                timeLeft = Level.timeLimit - (Game1.gameMiliseconds - Level.startTime) / 1000;
             if (timeLeft < 0)
             {
                 Game1.character.die();
@@ -54,6 +56,8 @@ namespace DynaBlaster
             {
                 if (scoreArray[i] != -1)
                     sb.Draw(Game1.spriteAtlas, new Rectangle(16 + 8 * i, 8,8,8), getDigitRect(scoreArray[i]), Color.White);
+                if (hiScoreArray[i] != -1)
+                    sb.Draw(Game1.spriteAtlas, new Rectangle(175 + 8 * i, 8, 8, 8), getDigitRect(hiScoreArray[i]), Color.White);
             }
             sb.Draw(Game1.spriteAtlas, new Rectangle(105, 8, 8, 8), getDigitRect(min), Color.White);
             sb.Draw(Game1.spriteAtlas, new Rectangle(120, 8, 8, 8), getDigitRect(s1), Color.White);
@@ -64,6 +68,19 @@ namespace DynaBlaster
         private Rectangle getDigitRect(int nr)
         {
             return new Rectangle(803 + 8 * nr, 912,8, 8);
+        }
+
+        public void fillHiScoreArray()
+        {
+            String hiScoreStr = Game1.hiScore.ToString();
+            int scoreLength = hiScoreStr.Length;
+            for (int i = 0; i < 9; i++)
+            {
+                if (9 - i > scoreLength)
+                    hiScoreArray[i] = -1;
+                else
+                    hiScoreArray[i] = (int)Char.GetNumericValue(hiScoreStr[i - (9 - scoreLength)]);
+            }
         }
     }
 }

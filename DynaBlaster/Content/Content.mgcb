@@ -49,24 +49,6 @@
 /processorParam:TextureFormat=Color
 /build:bomb.png
 
-#begin music1.mp3
-/importer:Mp3Importer
-/processor:SongProcessor
-/processorParam:Quality=Best
-/build:music1.mp3
-
-#begin music2.mp3
-/importer:Mp3Importer
-/processor:SongProcessor
-/processorParam:Quality=Best
-/build:music2.mp3
-
-#begin music3.mp3
-/importer:Mp3Importer
-/processor:SongProcessor
-/processorParam:Quality=Best
-/build:music3.mp3
-
 #begin stageStart.mp3
 /importer:Mp3Importer
 /processor:SongProcessor
@@ -90,4 +72,22 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:explosion.wav
+
+#begin music1.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:music1.wav
+
+#begin music2.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:music2.wav
+
+#begin music3.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:music3.wav
 

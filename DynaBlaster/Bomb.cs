@@ -106,8 +106,8 @@ namespace DynaBlaster
             explosionAnimation = new Animation(7, 67);
             exploded = true;
             explosionTime = Game1.gameMiliseconds;
-            Game1.exp.Stop();
-            Game1.exp.Play();
+            Game1.sounds.explosion.Stop();
+            Game1.sounds.explosion.Play();
             explosionRange = new int[4];
             int checkedRow=0, checkedColumn=0, i;
             if (character.row == row && character.column == column)

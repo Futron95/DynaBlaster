@@ -143,6 +143,11 @@ namespace DynaBlaster
                     sourceRectangle = getSourceRectangle(scoreDictionary[actualScore]);
                     scoreDisplay = true;
                     Game1.score += actualScore;
+                    if (Game1.score>Game1.hiScore)
+                    {
+                        Game1.hiScore = Game1.score;
+                        Game1.hud.fillHiScoreArray();
+                    }
                 }
                 else
                     sourceRectangle = getSourceRectangle(dyingSpriteNrs[type][dyingAnimation.getCurrentFrame()]);

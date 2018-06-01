@@ -25,7 +25,8 @@ namespace DynaBlaster
         Animation teleportingAnimation, starsAnimation;
         Rectangle starsSourceRectangle;
         public long cutTime;
-        public int bombsAvailable, cuts;       
+        public int bombsAvailable, cuts;
+        private Game1 game;
 
         public int column
         {
@@ -53,14 +54,15 @@ namespace DynaBlaster
             Character.dying = new int[12] { 12, 13, 12, 13, 12, 13, 14, 15, 16, 17, 18, 19 };
         }   
 
-        public Character()
+        public Character(Game1 game)
         {
+            this.game = game;
             width = 24;
             height = 24;
             sourceRectangle = new Rectangle(0, 0, 24, 24);
             speed = 0.8;    
-            bombsAvailable = 4;
-            bombPower = 3;
+            bombsAvailable = 1;
+            bombPower = 1;
             lives = 2;
             deathTime = 0;
             walk = new Animation(4, 125);
@@ -125,6 +127,7 @@ namespace DynaBlaster
                         y = row * 16 + 19;
                         teleporting = true;
                         cutTime = Game1.gameMiliseconds;
+                        Game1.sounds.music[Game1.currentLevelNr % 3].Stop();
                         MediaPlayer.Play(Game1.sounds.teleport);
                     }
                 }
@@ -248,11 +251,15 @@ namespace DynaBlaster
 
         public void die()
         {
-            dead = true;
-            lives--;
+            dead = true;           
             dyingAnimation.reset();
             deathTime = Game1.gameMiliseconds;
+            Game1.sounds.music[Game1.currentLevelNr % 3].Stop();
             MediaPlayer.Play(Game1.sounds.death);
+            if (lives > 0)
+                lives--;
+            else
+                game.gameOver = true;
         }
 
         public void draw(SpriteBatch sb)

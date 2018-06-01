@@ -26,7 +26,7 @@ namespace DynaBlaster
         }
         public Boolean dead, visible;
         protected int width, height;
-        protected double speed;
+        public double speed;
         protected static Random r;
 
         public double x;
