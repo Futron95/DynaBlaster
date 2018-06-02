@@ -37,7 +37,7 @@ namespace DynaBlaster
                 else
                     scoreArray[i] = (int)Char.GetNumericValue(scoreStr[i - (9 - scoreLength)]);
             }
-            if (!Game1.character.teleporting)
+            if (!Game1.character.teleporting && !Game1.character.dead)
                 timeLeft = Level.timeLimit - (Game1.gameMiliseconds - Level.startTime) / 1000;
             if (timeLeft < 0)
             {

@@ -115,6 +115,24 @@ namespace DynaBlaster
 
         public void Update(Controls controls)
         {
+            Bomb tempBomb;
+            for (int i = bombs.Count - 1; i >= 0; i--)
+            {
+                tempBomb = bombs.ElementAt(i);
+                if (tempBomb.exploded)
+                {
+                    if (Game1.gameMiliseconds - tempBomb.explosionTime > tempBomb.explosionAnimation.length)
+                        bombs.Remove(tempBomb);
+                    else
+                    {
+                        tempBomb.destroy(this);
+                    }
+                }
+                else if (Game1.gameMiliseconds - tempBomb.plantTime > 2500)
+                {
+                    tempBomb.explode(this);
+                }       
+            }
             if (!visible)
                 return;
             if (!teleporting)
@@ -135,7 +153,7 @@ namespace DynaBlaster
             if (teleporting)
             {
                 setTeleportingSourceRectangle();
-                setStarsSourceRectangle(starsAnimation.getCurrentFrame());
+                starsSourceRectangle = new Rectangle(170 + starsAnimation.getCurrentFrame() * 28, 24, 28, 16);
                 return;
             }
             if (dead)
@@ -264,22 +282,10 @@ namespace DynaBlaster
 
         public void draw(SpriteBatch sb)
         {
-            Bomb bomb;
-            for (int i = bombs.Count - 1; i >= 0; i--)
-            {
-                bomb = bombs.ElementAt(i);
-                if (bomb.exploded && Game1.gameMiliseconds-bomb.explosionTime>bomb.explosionAnimation.length)
-                {
-                    bombs.Remove(bomb);
-                    bombsAvailable++;
-                }
-                else
-                {
-                    if (!bomb.exploded && Game1.gameMiliseconds - bomb.plantTime > 2500)
-                        bomb.explode(this);
-                    bomb.draw(sb, bombPower);
-                }
-            }
+            
+           foreach(Bomb bomb in bombs)
+                bomb.draw(sb, bombPower);
+           
             if (visible)
             {
                 sb.Draw(Game1.spriteAtlas, locationRectangle, sourceRectangle, Color.White);
@@ -320,7 +326,6 @@ namespace DynaBlaster
                 else
                     y += speed;               
             }
-            //Game1.debug = new Rectangle(targetColumn * 16 - 4, targetRow * 16 + 28, 8, 8);
             if (Game1.levels[Game1.currentLevelNr].tiles[targetRow, targetColumn].hasObstacle)
             {
                 this.x = (targetColumn + 1) * 16 - 11;
@@ -363,7 +368,6 @@ namespace DynaBlaster
                 else
                     y += speed;               
             }
-            //Game1.debug = new Rectangle(targetColumn * 16 - 4, targetRow * 16 + 28, 8, 8);
             if (Game1.levels[Game1.currentLevelNr].tiles[targetRow, targetColumn].hasObstacle)
             {
                 this.x = (targetColumn -1) * 16 - 11;
@@ -405,7 +409,6 @@ namespace DynaBlaster
                 else
                     x += speed;               
             }
-            //Game1.debug = new Rectangle(targetColumn * 16 - 4, targetRow * 16 + 28, 8, 8);
             if (Game1.levels[Game1.currentLevelNr].tiles[targetRow, targetColumn].hasObstacle)
             {
                 this.y = (targetRow + 1) * 16 + 19;
@@ -448,7 +451,6 @@ namespace DynaBlaster
                 else
                     x += speed;              
             }
-            //Game1.debug = new Rectangle(targetColumn * 16 - 4, targetRow * 16 + 28, 8, 8);
             if (Game1.levels[Game1.currentLevelNr].tiles[targetRow, targetColumn].hasObstacle)
             {
                 this.y = (targetRow -1) * 16 + 19;
@@ -456,11 +458,6 @@ namespace DynaBlaster
             }
             this.x = x;
             this.y = y;
-        }
-
-        private void setStarsSourceRectangle(int frame)
-        {
-            starsSourceRectangle = new Rectangle(170 + frame * 28, 24, 28, 16);
         }
     }
 }

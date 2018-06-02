@@ -31,9 +31,6 @@ namespace DynaBlaster
         RenderTarget2D _nativeRenderTarget;
         Rectangle screenRect;
         Controls controls;
-       
-
-        //public static Rectangle debug;
 
         public Game1()
         {
@@ -84,7 +81,6 @@ namespace DynaBlaster
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             character = new Character(this);
-            loadBombSprites();
             levels = new Level[64];
             currentLevelNr = 0;
             createCurrentLevel();
@@ -107,48 +103,12 @@ namespace DynaBlaster
             return new Point[] { new Point(a + 24, 0), new Point(a, 0), new Point(a + 48, 0), new Point(a, 0) };
         }
 
-        private void loadBombSprites()
-        {
-            Bomb.burning = new Point[4];
-            Bomb.burning[0] = new Point(486, 0);
-            Bomb.burning[1] = new Point(470, 0);
-            Bomb.burning[2] = new Point(502, 0);
-            Bomb.burning[3] = Bomb.burning[1];
-            Bomb.topEnd = getExplosionSprites(326, 16);
-            Bomb.rightEnd = getExplosionSprites(390, 16);
-            Bomb.bottomEnd = getExplosionSprites(454, 16);
-            Bomb.leftEnd = getExplosionSprites(518, 16);
-            Bomb.vertical = getExplosionSprites(582, 16);
-            Bomb.horizontal = getExplosionSprites(326, 32);
-            Bomb.center = new Point[7];
-            Bomb.center[0] = new Point(454, 32);
-            Bomb.center[1] = new Point(422, 32);
-            Bomb.center[2] = new Point(406, 32);
-            Bomb.center[3] = new Point(390, 32);
-            Bomb.center[4] = Bomb.center[2];
-            Bomb.center[5] = Bomb.center[1];
-            Bomb.center[6] = new Point(438, 32);
-        }
-
-        private Point[] getExplosionSprites(int x, int y)
-        {
-            Point[] sprites = new Point[7];
-            sprites[0] = new Point(x+48, y);
-            sprites[1] = new Point(x+32, y);
-            sprites[2] = new Point(x+16, y);
-            sprites[3] = new Point(x, y);
-            sprites[4] = sprites[2];
-            sprites[5] = sprites[1];
-            sprites[6] = sprites[0];
-            return sprites;
-        }
-
         protected override void UnloadContent()
         {
 
         }
 
-        private void restartLevel()
+        private void restartLevel() //przywraca obecny poziom do domyœlnego stanu np. po œmierci postaci
         {
             MediaPlayer.Play(sounds.stageStart);
             NonGameplay.stageNrTime = gameMiliseconds;
@@ -244,7 +204,6 @@ namespace DynaBlaster
             {
                 levels[currentLevelNr].draw(spriteBatch);                                                 //rysowanie poziomu           
                 character.draw(spriteBatch);                                                              //rysowanie postaci      
-              //DrawRectangle(debug, Color.White);                                                        //rysowanie prostok¹ta do debugowania
                 hud.draw(spriteBatch);                                                                    //rysowanie hud'a
             }
             else
@@ -258,7 +217,7 @@ namespace DynaBlaster
             spriteBatch.End();
         }
 
-        public void restart()
+        public void restart()       //resetuje ca³¹ grê
         {
             if (score >= hiScore)
                 saveHiScore();
@@ -272,28 +231,18 @@ namespace DynaBlaster
             restartLevel();
         }
 
-        void DrawRectangle(Rectangle coords, Color color)
-        {
-            Texture2D rect = new Texture2D(GraphicsDevice, 1, 1);
-            rect.SetData(new[] { Color.White });
-
-            spriteBatch.Draw(rect, coords, color);
-        }
-
         private void createCurrentLevel()
         {
             switch(currentLevelNr)
             {
-                case 0: levels[0] = new Level(13, 17, 0, new int[] { 0, 1, 2 }); break;
+                case 0: levels[0] = new Level(13, 17, 0, new int[] { 0, 0, 0 }); break;
                 case 1: levels[1] = new Level(19, 17, 1, new int[] { 3, 4, 5}); break;
                 case 2: levels[2] = new Level(13, 23, 2, new int[] { 6, 7, 8 }); break;
                 default: levels[currentLevelNr] = Level.getRandomLevel(); break;
             }
-            
-
         }
 
-        public static Boolean isWalkable(Point p)
+        public static Boolean isWalkable(Point p)       //sprawdza czy mo¿na chodziæ po tile'u le¿¹cym na wspó³rzêdnych x,y otrzymanego punktu czyli czy nie ma na nim przeszkód lub bomby
         {
             int column = p.X;
             int row = p.Y;
@@ -307,7 +256,7 @@ namespace DynaBlaster
             return true;
         }
 
-        private void GetHiScore()
+        private void GetHiScore()       //pobiera rekordowy wynik z pliku tekstowego, je¿eli plik taki nie istnieje, tworzy go i ustala rekordowy wynik jako 0
         {
             var store = IsolatedStorageFile.GetUserStoreForApplication();
 
@@ -330,7 +279,7 @@ namespace DynaBlaster
             }
         }
 
-        private void saveHiScore()
+        private void saveHiScore()          //zapisuje rekordowy wynik do pliku tekstowego aby by³ on dostêpny przy ka¿dym uruchomieniu gry
         {
             var store = IsolatedStorageFile.GetUserStoreForApplication();
             var fs = store.OpenFile("score.txt", FileMode.OpenOrCreate);

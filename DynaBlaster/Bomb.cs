@@ -25,6 +25,28 @@ namespace DynaBlaster
         Point size;
         public Animation burningAnimation, explosionAnimation;
         
+        static Bomb()
+        {
+            burning = new Point[4];
+            burning[0] = new Point(486, 0);
+            burning[1] = new Point(470, 0);
+            burning[2] = new Point(502, 0);
+            burning[3] = Bomb.burning[1];
+            topEnd = getExplosionSprites(326, 16);
+            rightEnd = getExplosionSprites(390, 16);
+            bottomEnd = getExplosionSprites(454, 16);
+            leftEnd = getExplosionSprites(518, 16);
+            vertical = getExplosionSprites(582, 16);
+            horizontal = getExplosionSprites(326, 32);
+            center = new Point[7];
+            center[0] = new Point(454, 32);
+            center[1] = new Point(422, 32);
+            center[2] = new Point(406, 32);
+            center[3] = new Point(390, 32);
+            center[4] = Bomb.center[2];
+            center[5] = Bomb.center[1];
+            center[6] = new Point(438, 32);
+        }
 
         public Bomb(int column, int row)
         {
@@ -101,17 +123,48 @@ namespace DynaBlaster
                 sb.Draw(Game1.spriteAtlas, new Rectangle(x, y, size.X, size.Y), new Rectangle(burning[burningAnimation.getCurrentFrame()], size), Color.White);
         }
 
+        public void destroy(Character character)    //niszczy postacie potwory i inne bomby znajdujące się w zasięgu wybuchu
+        {
+            if (character.row == row && character.column == column)
+                character.die();
+            int checkedRow = 0, checkedColumn = 0, i;
+            for (int dir = 0; dir < 4; dir++)
+            {
+                for (i = 1; i <= explosionRange[dir]; i++)
+                {
+                    switch (dir)        //określanie w którym rzędzie i kolumnie znajduje się następny sprawdzany tile na podstawie kierunku(dir) i odległości od bomby(i)
+                    {
+                        case 0: checkedRow = row - i; checkedColumn = column; break;
+                        case 1: checkedRow = row; checkedColumn = column + i; break;
+                        case 2: checkedRow = row + i; checkedColumn = column; break;
+                        case 3: checkedRow = row; checkedColumn = column - i; break;
+                    }
+                    if (!character.dead && checkedRow == character.row && checkedColumn == character.column && !character.teleporting)
+                        character.die();
+                    foreach (Monster m in Game1.levels[Game1.currentLevelNr].monsters)      //sprawdzanie czy wybuch sięgnie potwora
+                        if (!m.dead && checkedRow == m.row && checkedColumn == m.column)
+                            m.die();
+                    foreach (Bomb bomb in character.bombs)                                  //sprawdzanie czy wybuch sięgnie inną bombę
+                        if (!bomb.exploded && bomb.column == checkedColumn && bomb.row == checkedRow)
+                        {
+                            bomb.explode(character);                  
+                            break;
+                        }
+                }
+            }
+        }
+
         public void explode(Character character)
         {
             explosionAnimation = new Animation(7, 67);
             exploded = true;
+            character.bombsAvailable++;
             explosionTime = Game1.gameMiliseconds;
             Game1.sounds.explosion.Stop();
             Game1.sounds.explosion.Play();
             explosionRange = new int[4];
             int checkedRow=0, checkedColumn=0, i;
-            if (character.row == row && character.column == column)
-                character.die();
+           
             for (int dir = 0; dir < 4; dir++)
             {
                 for (i = 1; i <= character.bombPower; i++)
@@ -131,31 +184,29 @@ namespace DynaBlaster
                         if (!checkedTile.hasObstacle)
                         {
                             if (checkedTile.walkable)
-                            {
-                                if (!character.dead && checkedRow == character.row && checkedColumn == character.column && !character.teleporting)
-                                    character.die();
-                                foreach (Monster m in Game1.levels[Game1.currentLevelNr].monsters)
-                                    if (!m.dead && checkedRow == m.row && checkedColumn == m.column)
-                                        m.die();
-                                Boolean trigger = false;
-                                foreach (Bomb bomb in character.bombs)                          //sprawdzanie czy wybuch sięgnie inną bombę
-                                    if (!bomb.exploded && bomb.column == checkedColumn && bomb.row == checkedRow)
-                                    {
-                                        trigger = true;
-                                        bomb.explode(character);                                //TODO: sprawdzić czy wybuch zabija postać, potwora lub bonus
-                                        break;
-                                    }
-                                if (!trigger)
-                                    continue;
-                            }
+                                continue;
                         }
                         else
-                            checkedTile.destroy();        //TODO: wywolanie animacji wybuchania obstacla
+                            checkedTile.destroy();
                     }                   
                     break;
                 }
                 explosionRange[dir] = i - 1;
             }
+            destroy(character);
+        }
+
+        private static Point[] getExplosionSprites(int x, int y)
+        {
+            Point[] sprites = new Point[7];
+            sprites[0] = new Point(x + 48, y);
+            sprites[1] = new Point(x + 32, y);
+            sprites[2] = new Point(x + 16, y);
+            sprites[3] = new Point(x, y);
+            sprites[4] = sprites[2];
+            sprites[5] = sprites[1];
+            sprites[6] = sprites[0];
+            return sprites;
         }
     }
 }
